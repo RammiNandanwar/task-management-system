@@ -39,3 +39,22 @@ exports.createTask = async (req, res) => {
         });
     }
 };
+
+// Get all tasks for logged-in user
+exports.getAllTasks = async (req, res) => {
+    try {
+        const tasks = await Task.find({
+            user: req.user.userId
+        }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            count: tasks.length,
+            tasks
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
