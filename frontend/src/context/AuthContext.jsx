@@ -1,38 +1,38 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import API from "../services/api";
-
-const AuthContext = createContext();
+import { AuthContext } from "./AuthContext.js";
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
 
-    // Check if user is already logged in
+    const [loading, setLoading] = useState(() => {
+        return !!localStorage.getItem("token");
+    });
+
     useEffect(() => {
         const token = localStorage.getItem("token");
 
-        if (token) {
-            API.get("/auth/me", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-                .then((response) => {
-                    setUser(response.data.user);
-                })
-                .catch(() => {
-                    localStorage.removeItem("token");
-                    setUser(null);
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        } else {
-            setLoading(false);
+        if (!token) {
+            return;
         }
+
+        API.get("/auth/me", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then((response) => {
+                setUser(response.data.user);
+            })
+            .catch(() => {
+                localStorage.removeItem("token");
+                setUser(null);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
-    // Login
     const login = async (email, password) => {
         const response = await API.post("/auth/login", {
             email,
@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }) => {
         return response.data;
     };
 
-    // Logout
     const logout = () => {
         localStorage.removeItem("token");
         setUser(null);
@@ -65,8 +64,4 @@ export const AuthProvider = ({ children }) => {
             {children}
         </AuthContext.Provider>
     );
-};
-
-export const useAuth = () => {
-    return useContext(AuthContext);
 };
