@@ -40,9 +40,7 @@ const Dashboard = () => {
             <button onClick={logout}>
                 Logout
             </button>
-
             <hr />
-
             <CreateTask
                  onTaskCreated={(newTask) => {
                     setTasks((previousTasks) => [
@@ -51,7 +49,6 @@ const Dashboard = () => {
                     ]);
                 }}
             />
-
             <hr />
 
             <h2>My Tasks</h2>
