@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import API from "../services/api";
+import CreateTask from "../components/CreateTask";
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -39,6 +40,17 @@ const Dashboard = () => {
             <button onClick={logout}>
                 Logout
             </button>
+
+            <hr />
+
+            <CreateTask
+                 onTaskCreated={(newTask) => {
+                    setTasks((previousTasks) => [
+                         newTask,
+                         ...previousTasks
+                    ]);
+                }}
+            />
 
             <hr />
 
