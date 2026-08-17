@@ -1,7 +1,9 @@
 import { useState } from "react";
 import API from "../services/api";
 
-const CreateTask = ({ onTaskCreated }) => {
+const CreateTask = ({
+    onTaskCreated
+}) => {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -32,7 +34,9 @@ const CreateTask = ({ onTaskCreated }) => {
                 formData
             );
 
-            onTaskCreated(response.data.task);
+            onTaskCreated(
+                response.data.task
+            );
 
             setFormData({
                 title: "",
@@ -52,36 +56,46 @@ const CreateTask = ({ onTaskCreated }) => {
     };
 
     return (
-        <div>
-            <h2>Create New Task</h2>
+        <form
+            className="create-task-form"
+            onSubmit={handleSubmit}
+        >
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Title</label>
+            <div className="form-group">
+                <label>
+                    Task Title
+                </label>
 
-                    <input
-                        type="text"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        placeholder="Enter task title"
-                        required
-                    />
-                </div>
+                <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Enter task title"
+                    required
+                />
+            </div>
 
-                <div>
-                    <label>Description</label>
+            <div className="form-group">
+                <label>
+                    Description
+                </label>
 
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        placeholder="Enter task description"
-                    />
-                </div>
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Enter task description"
+                    rows="4"
+                />
+            </div>
 
-                <div>
-                    <label>Status</label>
+            <div className="form-row">
+
+                <div className="form-group">
+                    <label>
+                        Status
+                    </label>
 
                     <select
                         name="status"
@@ -102,8 +116,10 @@ const CreateTask = ({ onTaskCreated }) => {
                     </select>
                 </div>
 
-                <div>
-                    <label>Priority</label>
+                <div className="form-group">
+                    <label>
+                        Priority
+                    </label>
 
                     <select
                         name="priority"
@@ -124,8 +140,10 @@ const CreateTask = ({ onTaskCreated }) => {
                     </select>
                 </div>
 
-                <div>
-                    <label>Due Date</label>
+                <div className="form-group">
+                    <label>
+                        Due Date
+                    </label>
 
                     <input
                         type="date"
@@ -135,20 +153,25 @@ const CreateTask = ({ onTaskCreated }) => {
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                >
-                    {loading
-                        ? "Creating..."
-                        : "Create Task"}
-                </button>
-            </form>
+            </div>
 
             {error && (
-                <p>{error}</p>
+                <div className="error-message">
+                    {error}
+                </div>
             )}
-        </div>
+
+            <button
+                className="create-btn"
+                type="submit"
+                disabled={loading}
+            >
+                {loading
+                    ? "Creating..."
+                    : "Create Task"}
+            </button>
+
+        </form>
     );
 };
 
