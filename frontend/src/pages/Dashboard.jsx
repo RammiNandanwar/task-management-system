@@ -149,166 +149,297 @@ const Dashboard = () => {
     });
 
     // ================================
-    // DASHBOARD UI
+    // TASK COUNTS
     // ================================
 
+    const pendingCount = tasks.filter(
+        (task) => task.status === "pending"
+    ).length;
+
+    const inProgressCount = tasks.filter(
+        (task) => task.status === "in-progress"
+    ).length;
+
+    const completedCount = tasks.filter(
+        (task) => task.status === "completed"
+    ).length;
+
     return (
-        <div>
-            <h1>Dashboard</h1>
+        <div className="dashboard">
 
-            <h2>
-                Welcome, {user?.name}
-            </h2>
+            {/* ============================
+                HEADER
+            ============================ */}
 
-            <p>
-                Email: {user?.email}
-            </p>
+            <header className="dashboard-header">
+                <div>
+                    <h1>Task Management</h1>
+                    <p>
+                        Organize and manage your tasks
+                    </p>
+                </div>
 
-            <button onClick={logout}>
-                Logout
-            </button>
+                <div className="user-section">
+                    <div>
+                        <strong>
+                            {user?.name}
+                        </strong>
 
-            <hr />
+                        <span>
+                            {user?.email}
+                        </span>
+                    </div>
+
+                    <button
+                        className="logout-btn"
+                        onClick={logout}
+                    >
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            {/* ============================
+                STATISTICS
+            ============================ */}
+
+            <section className="stats-grid">
+
+                <div className="stat-card">
+                    <span>Total Tasks</span>
+                    <strong>{tasks.length}</strong>
+                </div>
+
+                <div className="stat-card">
+                    <span>Pending</span>
+                    <strong>{pendingCount}</strong>
+                </div>
+
+                <div className="stat-card">
+                    <span>In Progress</span>
+                    <strong>{inProgressCount}</strong>
+                </div>
+
+                <div className="stat-card">
+                    <span>Completed</span>
+                    <strong>{completedCount}</strong>
+                </div>
+
+            </section>
 
             {/* ============================
                 CREATE TASK
             ============================ */}
 
-            <CreateTask
-                onTaskCreated={handleTaskCreated}
-            />
-
-            <hr />
-
-            {/* ============================
-                TASK LIST
-            ============================ */}
-
-            <h2>My Tasks</h2>
-
-            {/* ============================
-                SEARCH
-            ============================ */}
-
-            <div>
-                <input
-                    type="text"
-                    placeholder="Search tasks..."
-                    value={searchTerm}
-                    onChange={(e) =>
-                        setSearchTerm(e.target.value)
-                    }
-                />
-            </div>
-
-            <br />
-
-            {/* ============================
-                FILTER BUTTONS
-            ============================ */}
-
-            <div>
-                <button
-                    onClick={() => setFilter("all")}
-                >
-                    All
-                </button>
-
-                <button
-                    onClick={() =>
-                        setFilter("pending")
-                    }
-                >
-                    Pending
-                </button>
-
-                <button
-                    onClick={() =>
-                        setFilter("in-progress")
-                    }
-                >
-                    In Progress
-                </button>
-
-                <button
-                    onClick={() =>
-                        setFilter("completed")
-                    }
-                >
-                    Completed
-                </button>
-            </div>
-
-            <br />
-
-            {/* Loading */}
-            {loading && (
-                <p>
-                    Loading tasks...
-                </p>
-            )}
-
-            {/* Error */}
-            {error && (
-                <p>
-                    {error}
-                </p>
-            )}
-
-            {/* No tasks at all */}
-            {!loading &&
-                !error &&
-                tasks.length === 0 && (
-                    <p>
-                        No tasks found.
-                    </p>
-                )}
-
-            {/* No search/filter results */}
-            {!loading &&
-                tasks.length > 0 &&
-                filteredTasks.length === 0 && (
-                    <p>
-                        No tasks match your search
-                        or selected filter.
-                    </p>
-                )}
-
-            {/* Filtered tasks */}
-            {!loading &&
-                filteredTasks.length > 0 && (
+            <section className="dashboard-section">
+                <div className="section-header">
                     <div>
-                        {filteredTasks.map((task) => (
-                            <div key={task._id}>
-                                {editingTask?._id === task._id ? (
-                                    <EditTask
-                                        task={task}
-                                        onUpdate={
-                                            handleUpdateTask
-                                        }
-                                        onCancel={() =>
-                                            setEditingTask(
-                                                null
-                                            )
-                                        }
-                                    />
-                                ) : (
-                                    <TaskCard
-                                        task={task}
-                                        onEdit={
-                                            handleEditTask
-                                        }
-                                        onDelete={
-                                            handleDeleteTask
-                                        }
-                                    />
-                                )}
+                        <h2>Create New Task</h2>
 
-                                <hr />
-                            </div>
-                        ))}
+                        <p>
+                            Add a new task to your workspace
+                        </p>
+                    </div>
+                </div>
+
+                <div className="create-task-card">
+                    <CreateTask
+                        onTaskCreated={
+                            handleTaskCreated
+                        }
+                    />
+                </div>
+            </section>
+
+            {/* ============================
+                TASKS
+            ============================ */}
+
+            <section className="dashboard-section">
+
+                <div className="section-header">
+                    <div>
+                        <h2>My Tasks</h2>
+
+                        <p>
+                            View and manage your tasks
+                        </p>
+                    </div>
+                </div>
+
+                {/* SEARCH */}
+
+                <div className="task-controls">
+
+                    <input
+                        className="search-input"
+                        type="text"
+                        placeholder="Search tasks..."
+                        value={searchTerm}
+                        onChange={(e) =>
+                            setSearchTerm(
+                                e.target.value
+                            )
+                        }
+                    />
+
+                    {/* FILTER */}
+
+                    <div className="filter-buttons">
+
+                        <button
+                            className={
+                                filter === "all"
+                                    ? "filter-btn active"
+                                    : "filter-btn"
+                            }
+                            onClick={() =>
+                                setFilter("all")
+                            }
+                        >
+                            All
+                        </button>
+
+                        <button
+                            className={
+                                filter === "pending"
+                                    ? "filter-btn active"
+                                    : "filter-btn"
+                            }
+                            onClick={() =>
+                                setFilter("pending")
+                            }
+                        >
+                            Pending
+                        </button>
+
+                        <button
+                            className={
+                                filter === "in-progress"
+                                    ? "filter-btn active"
+                                    : "filter-btn"
+                            }
+                            onClick={() =>
+                                setFilter(
+                                    "in-progress"
+                                )
+                            }
+                        >
+                            In Progress
+                        </button>
+
+                        <button
+                            className={
+                                filter === "completed"
+                                    ? "filter-btn active"
+                                    : "filter-btn"
+                            }
+                            onClick={() =>
+                                setFilter(
+                                    "completed"
+                                )
+                            }
+                        >
+                            Completed
+                        </button>
+
+                    </div>
+                </div>
+
+                {/* LOADING */}
+
+                {loading && (
+                    <div className="message-card">
+                        Loading tasks...
                     </div>
                 )}
+
+                {/* ERROR */}
+
+                {error && (
+                    <div className="error-message">
+                        {error}
+                    </div>
+                )}
+
+                {/* NO TASKS */}
+
+                {!loading &&
+                    !error &&
+                    tasks.length === 0 && (
+                        <div className="message-card">
+                            <h3>
+                                No tasks yet
+                            </h3>
+
+                            <p>
+                                Create your first task
+                                above.
+                            </p>
+                        </div>
+                    )}
+
+                {/* NO FILTER RESULTS */}
+
+                {!loading &&
+                    tasks.length > 0 &&
+                    filteredTasks.length === 0 && (
+                        <div className="message-card">
+                            <h3>
+                                No matching tasks
+                            </h3>
+
+                            <p>
+                                Try changing your
+                                search or filter.
+                            </p>
+                        </div>
+                    )}
+
+                {/* TASK GRID */}
+
+                {!loading &&
+                    filteredTasks.length > 0 && (
+                        <div className="task-grid">
+
+                            {filteredTasks.map(
+                                (task) => (
+                                    <div
+                                        key={task._id}
+                                        className="task-wrapper"
+                                    >
+                                        {editingTask?._id ===
+                                        task._id ? (
+                                            <EditTask
+                                                task={task}
+                                                onUpdate={
+                                                    handleUpdateTask
+                                                }
+                                                onCancel={() =>
+                                                    setEditingTask(
+                                                        null
+                                                    )
+                                                }
+                                            />
+                                        ) : (
+                                            <TaskCard
+                                                task={task}
+                                                onEdit={
+                                                    handleEditTask
+                                                }
+                                                onDelete={
+                                                    handleDeleteTask
+                                                }
+                                            />
+                                        )}
+                                    </div>
+                                )
+                            )}
+
+                        </div>
+                    )}
+
+            </section>
         </div>
     );
 };
