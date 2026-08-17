@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import API from "../services/api";
-import { AuthContext } from "./AuthContext.js";
+
+export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -16,11 +17,7 @@ export const AuthProvider = ({ children }) => {
             return;
         }
 
-        API.get("/auth/me", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        API.get("/auth/me")
             .then((response) => {
                 setUser(response.data.user);
             })

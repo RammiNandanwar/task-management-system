@@ -27,7 +27,10 @@ const CreateTask = ({ onTaskCreated }) => {
         setLoading(true);
 
         try {
-            const response = await API.post("/tasks", formData);
+            const response = await API.post(
+                "/tasks",
+                formData
+            );
 
             onTaskCreated(response.data.task);
 
@@ -53,9 +56,9 @@ const CreateTask = ({ onTaskCreated }) => {
             <h2>Create New Task</h2>
 
             <form onSubmit={handleSubmit}>
-
                 <div>
                     <label>Title</label>
+
                     <input
                         type="text"
                         name="title"
@@ -68,6 +71,7 @@ const CreateTask = ({ onTaskCreated }) => {
 
                 <div>
                     <label>Description</label>
+
                     <textarea
                         name="description"
                         value={formData.description}
@@ -84,9 +88,17 @@ const CreateTask = ({ onTaskCreated }) => {
                         value={formData.status}
                         onChange={handleChange}
                     >
-                        <option value="pending">Pending</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="completed">Completed</option>
+                        <option value="pending">
+                            Pending
+                        </option>
+
+                        <option value="in-progress">
+                            In Progress
+                        </option>
+
+                        <option value="completed">
+                            Completed
+                        </option>
                     </select>
                 </div>
 
@@ -98,9 +110,17 @@ const CreateTask = ({ onTaskCreated }) => {
                         value={formData.priority}
                         onChange={handleChange}
                     >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
+                        <option value="low">
+                            Low
+                        </option>
+
+                        <option value="medium">
+                            Medium
+                        </option>
+
+                        <option value="high">
+                            High
+                        </option>
                     </select>
                 </div>
 
@@ -115,13 +135,19 @@ const CreateTask = ({ onTaskCreated }) => {
                     />
                 </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Creating..." : "Create Task"}
+                <button
+                    type="submit"
+                    disabled={loading}
+                >
+                    {loading
+                        ? "Creating..."
+                        : "Create Task"}
                 </button>
-
             </form>
 
-            {error && <p>{error}</p>}
+            {error && (
+                <p>{error}</p>
+            )}
         </div>
     );
 };
