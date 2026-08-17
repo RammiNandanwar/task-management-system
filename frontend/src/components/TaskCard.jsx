@@ -1,34 +1,80 @@
-const TaskCard = ({ task, onEdit, onDelete }) => {
+const TaskCard = ({
+    task,
+    onEdit,
+    onDelete
+}) => {
     return (
-        <div>
-            <h3>{task.title}</h3>
+        <div className="task-card">
 
-            <p>
-                Description: {task.description || "No description"}
+            <div className="task-card-header">
+
+                <h3>
+                    {task.title}
+                </h3>
+
+                <span
+                    className={`status-badge status-${task.status}`}
+                >
+                    {task.status === "in-progress"
+                        ? "In Progress"
+                        : task.status}
+                </span>
+
+            </div>
+
+            <p className="task-description">
+                {task.description ||
+                    "No description provided"}
             </p>
 
-            <p>
-                Status: {task.status}
-            </p>
+            <div className="task-details">
 
-            <p>
-                Priority: {task.priority}
-            </p>
+                <div>
+                    <span>Priority</span>
 
-            {task.dueDate && (
-                <p>
-                    Due Date:{" "}
-                    {new Date(task.dueDate).toLocaleDateString()}
-                </p>
-            )}
+                    <strong
+                        className={`priority-${task.priority}`}
+                    >
+                        {task.priority}
+                    </strong>
+                </div>
 
-            <button onClick={() => onEdit(task)}>
-                Edit
-            </button>
+                {task.dueDate && (
+                    <div>
+                        <span>Due Date</span>
 
-            <button onClick={() => onDelete(task._id)}>
-                Delete
-            </button>
+                        <strong>
+                            {new Date(
+                                task.dueDate
+                            ).toLocaleDateString()}
+                        </strong>
+                    </div>
+                )}
+
+            </div>
+
+            <div className="task-actions">
+
+                <button
+                    className="edit-btn"
+                    onClick={() =>
+                        onEdit(task)
+                    }
+                >
+                    Edit
+                </button>
+
+                <button
+                    className="delete-btn"
+                    onClick={() =>
+                        onDelete(task._id)
+                    }
+                >
+                    Delete
+                </button>
+
+            </div>
+
         </div>
     );
 };
