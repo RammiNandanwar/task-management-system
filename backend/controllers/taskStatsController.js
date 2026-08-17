@@ -2,7 +2,7 @@ const Task = require("../models/task");
 
 exports.getTaskStats = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.userId;
 
         const totalTasks = await Task.countDocuments({
             user: userId
