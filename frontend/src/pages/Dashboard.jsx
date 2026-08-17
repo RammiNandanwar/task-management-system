@@ -3,6 +3,7 @@ import { useAuth } from "../context/useAuth";
 import API from "../services/api";
 import CreateTask from "../components/CreateTask";
 import TaskCard from "../components/TaskCard";
+import EditTask from "../components/EditTask";
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -35,19 +36,20 @@ const Dashboard = () => {
         fetchTasks();
     }, []);
 
-    // Handle edit button
+    // Open edit form
     const handleEditTask = (task) => {
         setEditingTask(task._id);
     };
 
     // Update task
-    const handleUpdateTask = async (taskId) => {
+    const handleUpdateTask = async (taskId, updatedData) => {
         try {
             setError("");
 
-            const response = await API.patch(`/tasks/${taskId}`, {
-                status: "completed"
-            });
+            const response = await API.patch(
+                `/tasks/${taskId}`,
+                updatedData
+            );
 
             setTasks((previousTasks) =>
                 previousTasks.map((task) =>
@@ -94,7 +96,7 @@ const Dashboard = () => {
         }
     };
 
-    // Add newly created task to the list
+    // Add newly created task
     const handleTaskCreated = (newTask) => {
         setTasks((previousTasks) => [
             newTask,
@@ -151,35 +153,15 @@ const Dashboard = () => {
                         {tasks.map((task) => (
                             <div key={task._id}>
                                 {editingTask === task._id ? (
-                                    <div>
-                                        <h3>
-                                            Edit Task
-                                        </h3>
-
-                                        <p>
-                                            {task.title}
-                                        </p>
-
-                                        <button
-                                            onClick={() =>
-                                                handleUpdateTask(
-                                                    task._id
-                                                )
-                                            }
-                                        >
-                                            Mark as Completed
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                setEditingTask(
-                                                    null
-                                                )
-                                            }
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
+                                    <EditTask
+                                        task={task}
+                                        onUpdate={
+                                            handleUpdateTask
+                                        }
+                                        onCancel={() =>
+                                            setEditingTask(null)
+                                        }
+                                    />
                                 ) : (
                                     <TaskCard
                                         task={task}
