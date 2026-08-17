@@ -20,24 +20,25 @@ const Dashboard = () => {
     // FETCH TASKS
     // ================================
 
+    const fetchTasks = async () => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const response = await API.get("/tasks");
+
+            setTasks(response.data.tasks || []);
+        } catch (error) {
+            setError(
+                error.response?.data?.error ||
+                "Unable to load tasks. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchTasks = async () => {
-            try {
-                setError("");
-
-                const response = await API.get("/tasks");
-
-                setTasks(response.data.tasks || []);
-            } catch (error) {
-                setError(
-                    error.response?.data?.error ||
-                    "Failed to load tasks"
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchTasks();
     }, []);
 
@@ -88,7 +89,7 @@ const Dashboard = () => {
         } catch (error) {
             setError(
                 error.response?.data?.error ||
-                "Failed to update task"
+                "Unable to update task. Please try again."
             );
         }
     };
@@ -119,7 +120,7 @@ const Dashboard = () => {
         } catch (error) {
             setError(
                 error.response?.data?.error ||
-                "Failed to delete task"
+                "Unable to delete task. Please try again."
             );
         }
     };
@@ -164,16 +165,19 @@ const Dashboard = () => {
         (task) => task.status === "completed"
     ).length;
 
+    // ================================
+    // DASHBOARD
+    // ================================
+
     return (
         <div className="dashboard">
 
-            {/* ============================
-                HEADER
-            ============================ */}
+            {/* HEADER */}
 
             <header className="dashboard-header">
                 <div>
                     <h1>Task Management</h1>
+
                     <p>
                         Organize and manage your tasks
                     </p>
@@ -199,39 +203,44 @@ const Dashboard = () => {
                 </div>
             </header>
 
-            {/* ============================
-                STATISTICS
-            ============================ */}
+            {/* STATISTICS */}
 
             <section className="stats-grid">
 
                 <div className="stat-card">
                     <span>Total Tasks</span>
-                    <strong>{tasks.length}</strong>
+                    <strong>
+                        {tasks.length}
+                    </strong>
                 </div>
 
                 <div className="stat-card">
                     <span>Pending</span>
-                    <strong>{pendingCount}</strong>
+                    <strong>
+                        {pendingCount}
+                    </strong>
                 </div>
 
                 <div className="stat-card">
                     <span>In Progress</span>
-                    <strong>{inProgressCount}</strong>
+                    <strong>
+                        {inProgressCount}
+                    </strong>
                 </div>
 
                 <div className="stat-card">
                     <span>Completed</span>
-                    <strong>{completedCount}</strong>
+                    <strong>
+                        {completedCount}
+                    </strong>
                 </div>
 
             </section>
 
-            {/* ============================
-                CREATE TASK
-            ============================ */}
+            {/* CREATE TASK */}
 
             <section className="dashboard-section">
+
                 <div className="section-header">
                     <div>
                         <h2>Create New Task</h2>
@@ -249,11 +258,10 @@ const Dashboard = () => {
                         }
                     />
                 </div>
+
             </section>
 
-            {/* ============================
-                TASKS
-            ============================ */}
+            {/* TASKS */}
 
             <section className="dashboard-section">
 
@@ -283,7 +291,7 @@ const Dashboard = () => {
                         }
                     />
 
-                    {/* FILTER */}
+                    {/* FILTER BUTTONS */}
 
                     <div className="filter-buttons">
 
@@ -320,9 +328,7 @@ const Dashboard = () => {
                                     : "filter-btn"
                             }
                             onClick={() =>
-                                setFilter(
-                                    "in-progress"
-                                )
+                                setFilter("in-progress")
                             }
                         >
                             In Progress
@@ -335,9 +341,7 @@ const Dashboard = () => {
                                     : "filter-btn"
                             }
                             onClick={() =>
-                                setFilter(
-                                    "completed"
-                                )
+                                setFilter("completed")
                             }
                         >
                             Completed
@@ -346,59 +350,124 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* LOADING */}
+                {/* ============================
+                    LOADING STATE
+                ============================ */}
 
                 {loading && (
-                    <div className="message-card">
-                        Loading tasks...
+                    <div className="state-card">
+                        <div className="loading-spinner"></div>
+
+                        <h3>
+                            Loading your tasks
+                        </h3>
+
+                        <p>
+                            Please wait while we
+                            fetch your tasks.
+                        </p>
                     </div>
                 )}
 
-                {/* ERROR */}
+                {/* ============================
+                    ERROR STATE
+                ============================ */}
 
-                {error && (
-                    <div className="error-message">
-                        {error}
+                {!loading && error && (
+                    <div className="state-card error-state">
+
+                        <div className="state-icon">
+                            !
+                        </div>
+
+                        <h3>
+                            Something went wrong
+                        </h3>
+
+                        <p>
+                            {error}
+                        </p>
+
+                        <button
+                            className="retry-btn"
+                            onClick={fetchTasks}
+                        >
+                            Try Again
+                        </button>
+
                     </div>
                 )}
 
-                {/* NO TASKS */}
+                {/* ============================
+                    EMPTY STATE
+                ============================ */}
 
                 {!loading &&
                     !error &&
                     tasks.length === 0 && (
-                        <div className="message-card">
+                        <div className="state-card">
+
+                            <div className="state-icon">
+                                +
+                            </div>
+
                             <h3>
                                 No tasks yet
                             </h3>
 
                             <p>
+                                You don't have any tasks.
                                 Create your first task
-                                above.
+                                above to get started.
                             </p>
+
                         </div>
                     )}
 
-                {/* NO FILTER RESULTS */}
+                {/* ============================
+                    NO SEARCH RESULTS
+                ============================ */}
 
                 {!loading &&
+                    !error &&
                     tasks.length > 0 &&
                     filteredTasks.length === 0 && (
-                        <div className="message-card">
+                        <div className="state-card">
+
+                            <div className="state-icon">
+                                ?
+                            </div>
+
                             <h3>
                                 No matching tasks
                             </h3>
 
                             <p>
-                                Try changing your
-                                search or filter.
+                                We couldn't find any
+                                tasks matching your
+                                search or selected
+                                filter.
                             </p>
+
+                            <button
+                                className="retry-btn"
+                                onClick={() => {
+                                    setSearchTerm("");
+                                    setFilter("all");
+                                }}
+                            >
+                                Clear Search & Filter
+                            </button>
+
                         </div>
                     )}
 
-                {/* TASK GRID */}
+                {/* ============================
+                    TASK GRID
+                ============================ */}
 
                 {!loading &&
+                    !error &&
                     filteredTasks.length > 0 && (
                         <div className="task-grid">
 
@@ -408,6 +477,7 @@ const Dashboard = () => {
                                         key={task._id}
                                         className="task-wrapper"
                                     >
+
                                         {editingTask?._id ===
                                         task._id ? (
                                             <EditTask
@@ -432,6 +502,7 @@ const Dashboard = () => {
                                                 }
                                             />
                                         )}
+
                                     </div>
                                 )
                             )}
@@ -440,6 +511,7 @@ const Dashboard = () => {
                     )}
 
             </section>
+
         </div>
     );
 };
