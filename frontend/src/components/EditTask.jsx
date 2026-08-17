@@ -42,27 +42,39 @@ const EditTask = ({ task, onUpdate, onCancel }) => {
                 <div>
                     <label>Title</label>
 
+                    <br />
+
                     <input
                         type="text"
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
+                        placeholder="Enter task title"
                         required
                     />
                 </div>
 
+                <br />
+
                 <div>
                     <label>Description</label>
+
+                    <br />
 
                     <textarea
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
+                        placeholder="Enter task description"
                     />
                 </div>
 
+                <br />
+
                 <div>
                     <label>Status</label>
+
+                    <br />
 
                     <select
                         name="status"
@@ -83,8 +95,12 @@ const EditTask = ({ task, onUpdate, onCancel }) => {
                     </select>
                 </div>
 
+                <br />
+
                 <div>
                     <label>Priority</label>
+
+                    <br />
 
                     <select
                         name="priority"
@@ -105,8 +121,12 @@ const EditTask = ({ task, onUpdate, onCancel }) => {
                     </select>
                 </div>
 
+                <br />
+
                 <div>
                     <label>Due Date</label>
+
+                    <br />
 
                     <input
                         type="date"
@@ -116,9 +136,13 @@ const EditTask = ({ task, onUpdate, onCancel }) => {
                     />
                 </div>
 
+                <br />
+
                 <button type="submit">
                     Save Changes
                 </button>
+
+                {" "}
 
                 <button
                     type="button"
