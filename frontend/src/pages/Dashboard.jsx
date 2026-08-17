@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/useAuth";
 import API from "../services/api";
 import CreateTask from "../components/CreateTask";
+import TaskCard from "../components/TaskCard";
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -12,12 +13,15 @@ const Dashboard = () => {
 
     const [editingTask, setEditingTask] = useState(null);
 
+    // Fetch tasks
     useEffect(() => {
         const fetchTasks = async () => {
             try {
+                setError("");
+
                 const response = await API.get("/tasks");
 
-                setTasks(response.data.tasks);
+                setTasks(response.data.tasks || []);
             } catch (error) {
                 setError(
                     error.response?.data?.error ||
@@ -31,9 +35,16 @@ const Dashboard = () => {
         fetchTasks();
     }, []);
 
+    // Handle edit button
+    const handleEditTask = (task) => {
+        setEditingTask(task._id);
+    };
+
     // Update task
     const handleUpdateTask = async (taskId) => {
         try {
+            setError("");
+
             const response = await API.patch(`/tasks/${taskId}`, {
                 status: "completed"
             });
@@ -45,6 +56,8 @@ const Dashboard = () => {
                         : task
                 )
             );
+
+            setEditingTask(null);
         } catch (error) {
             setError(
                 error.response?.data?.error ||
@@ -64,6 +77,8 @@ const Dashboard = () => {
         }
 
         try {
+            setError("");
+
             await API.delete(`/tasks/${taskId}`);
 
             setTasks((previousTasks) =>
@@ -79,13 +94,23 @@ const Dashboard = () => {
         }
     };
 
+    // Add newly created task to the list
+    const handleTaskCreated = (newTask) => {
+        setTasks((previousTasks) => [
+            newTask,
+            ...previousTasks
+        ]);
+    };
+
     return (
         <div>
             <h1>Dashboard</h1>
 
             <h2>Welcome, {user?.name}</h2>
 
-            <p>Email: {user?.email}</p>
+            <p>
+                Email: {user?.email}
+            </p>
 
             <button onClick={logout}>
                 Logout
@@ -93,107 +118,85 @@ const Dashboard = () => {
 
             <hr />
 
+            {/* Create Task */}
             <CreateTask
-                onTaskCreated={(newTask) => {
-                    setTasks((previousTasks) => [
-                        newTask,
-                        ...previousTasks
-                    ]);
-                }}
+                onTaskCreated={handleTaskCreated}
             />
 
             <hr />
 
             <h2>My Tasks</h2>
 
-            {loading && <p>Loading tasks...</p>}
-
-            {error && <p>{error}</p>}
-
-            {!loading && !error && tasks.length === 0 && (
-                <p>No tasks found.</p>
+            {/* Loading */}
+            {loading && (
+                <p>Loading tasks...</p>
             )}
 
-            {!loading && tasks.length > 0 && (
-                <div>
-                    {tasks.map((task) => (
-                        <div key={task._id}>
-                            {editingTask === task._id ? (
-                                <div>
-                                    <h3>Edit Task</h3>
+            {/* Error */}
+            {error && (
+                <p>{error}</p>
+            )}
 
-                                    <p>
-                                        <strong>
-                                            {task.title}
-                                        </strong>
-                                    </p>
+            {/* No tasks */}
+            {!loading &&
+                !error &&
+                tasks.length === 0 && (
+                    <p>No tasks found.</p>
+                )}
 
-                                    <button
-                                        onClick={() => {
-                                            handleUpdateTask(task._id);
-                                            setEditingTask(null);
-                                        }}
-                                    >
-                                        Mark as Completed
-                                    </button>
+            {/* Tasks */}
+            {!loading &&
+                tasks.length > 0 && (
+                    <div>
+                        {tasks.map((task) => (
+                            <div key={task._id}>
+                                {editingTask === task._id ? (
+                                    <div>
+                                        <h3>
+                                            Edit Task
+                                        </h3>
 
-                                    <button
-                                        onClick={() =>
-                                            setEditingTask(null)
-                                        }
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            ) : (
-                                <div>
-                                    <h3>{task.title}</h3>
-
-                                    <p>
-                                        Description:{" "}
-                                        {task.description}
-                                    </p>
-
-                                    <p>
-                                        Status: {task.status}
-                                    </p>
-
-                                    <p>
-                                        Priority: {task.priority}
-                                    </p>
-
-                                    {task.dueDate && (
                                         <p>
-                                            Due Date:{" "}
-                                            {new Date(
-                                                task.dueDate
-                                            ).toLocaleDateString()}
+                                            {task.title}
                                         </p>
-                                    )}
 
-                                    <button
-                                        onClick={() =>
-                                            setEditingTask(task._id)
+                                        <button
+                                            onClick={() =>
+                                                handleUpdateTask(
+                                                    task._id
+                                                )
+                                            }
+                                        >
+                                            Mark as Completed
+                                        </button>
+
+                                        <button
+                                            onClick={() =>
+                                                setEditingTask(
+                                                    null
+                                                )
+                                            }
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <TaskCard
+                                        task={task}
+                                        onEdit={
+                                            handleEditTask
                                         }
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        onClick={() =>
-                                            handleDeleteTask(task._id)
+                                        onDelete={
+                                            handleDeleteTask
                                         }
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            )}
+                                    />
+                                )}
 
-                            <hr />
-                        </div>
-                    ))}
-                </div>
-            )}
+                                <hr />
+                            </div>
+                        ))}
+                    </div>
+                )}
         </div>
     );
 };
