@@ -14,6 +14,7 @@ const Dashboard = () => {
 
     const [editingTask, setEditingTask] = useState(null);
     const [filter, setFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
 
     // ================================
     // FETCH TASKS
@@ -63,7 +64,10 @@ const Dashboard = () => {
     // UPDATE TASK
     // ================================
 
-    const handleUpdateTask = async (taskId, updatedData) => {
+    const handleUpdateTask = async (
+        taskId,
+        updatedData
+    ) => {
         try {
             setError("");
 
@@ -121,15 +125,27 @@ const Dashboard = () => {
     };
 
     // ================================
-    // FILTER TASKS
+    // FILTER + SEARCH
     // ================================
 
     const filteredTasks = tasks.filter((task) => {
-        if (filter === "all") {
-            return true;
-        }
+        const matchesFilter =
+            filter === "all" ||
+            task.status === filter;
 
-        return task.status === filter;
+        const search = searchTerm
+            .toLowerCase()
+            .trim();
+
+        const matchesSearch =
+            task.title
+                ?.toLowerCase()
+                .includes(search) ||
+            task.description
+                ?.toLowerCase()
+                .includes(search);
+
+        return matchesFilter && matchesSearch;
     });
 
     // ================================
@@ -171,6 +187,23 @@ const Dashboard = () => {
             <h2>My Tasks</h2>
 
             {/* ============================
+                SEARCH
+            ============================ */}
+
+            <div>
+                <input
+                    type="text"
+                    placeholder="Search tasks..."
+                    value={searchTerm}
+                    onChange={(e) =>
+                        setSearchTerm(e.target.value)
+                    }
+                />
+            </div>
+
+            <br />
+
+            {/* ============================
                 FILTER BUTTONS
             ============================ */}
 
@@ -182,19 +215,25 @@ const Dashboard = () => {
                 </button>
 
                 <button
-                    onClick={() => setFilter("pending")}
+                    onClick={() =>
+                        setFilter("pending")
+                    }
                 >
                     Pending
                 </button>
 
                 <button
-                    onClick={() => setFilter("in-progress")}
+                    onClick={() =>
+                        setFilter("in-progress")
+                    }
                 >
                     In Progress
                 </button>
 
                 <button
-                    onClick={() => setFilter("completed")}
+                    onClick={() =>
+                        setFilter("completed")
+                    }
                 >
                     Completed
                 </button>
@@ -225,12 +264,13 @@ const Dashboard = () => {
                     </p>
                 )}
 
-            {/* No tasks for selected filter */}
+            {/* No search/filter results */}
             {!loading &&
                 tasks.length > 0 &&
                 filteredTasks.length === 0 && (
                     <p>
-                        No {filter} tasks found.
+                        No tasks match your search
+                        or selected filter.
                     </p>
                 )}
 
@@ -247,7 +287,9 @@ const Dashboard = () => {
                                             handleUpdateTask
                                         }
                                         onCancel={() =>
-                                            setEditingTask(null)
+                                            setEditingTask(
+                                                null
+                                            )
                                         }
                                     />
                                 ) : (
