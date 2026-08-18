@@ -13,11 +13,11 @@ const Dashboard = () => {
     const [error, setError] = useState("");
 
     const [stats, setStats] = useState({
-    totalTasks: 0,
-    pendingTasks: 0,
-    inProgressTasks: 0,
-    completedTasks: 0
-});
+        totalTasks: 0,
+        pendingTasks: 0,
+        inProgressTasks: 0,
+        completedTasks: 0
+    });
 
     const [editingTask, setEditingTask] = useState(null);
     const [filter, setFilter] = useState("all");
@@ -45,18 +45,26 @@ const Dashboard = () => {
         }
     };
 
-    const fetchStats = async () => {
-    try {
-        const response = await API.get("/tasks/stats");
+    // ================================
+    // FETCH TASK STATISTICS
+    // ================================
 
-        setStats(response.data);
-    } catch (error) {
-        console.error(
-            "Failed to fetch task statistics:",
-            error
-        );
-    }
-};
+    const fetchStats = async () => {
+        try {
+            const response = await API.get("/tasks/stats");
+
+            setStats(response.data);
+        } catch (error) {
+            console.error(
+                "Failed to fetch task statistics:",
+                error
+            );
+        }
+    };
+
+    // ================================
+    // INITIAL LOAD
+    // ================================
 
     useEffect(() => {
         fetchTasks();
@@ -68,13 +76,14 @@ const Dashboard = () => {
     // ================================
 
     const handleTaskCreated = (newTask) => {
-    setTasks((previousTasks) => [
-        newTask,
-        ...previousTasks
-    ]);
+        setTasks((previousTasks) => [
+            newTask,
+            ...previousTasks
+        ]);
 
-    fetchStats();
-};
+        // Refresh statistics
+        fetchStats();
+    };
 
     // ================================
     // OPEN EDIT FORM
@@ -108,7 +117,12 @@ const Dashboard = () => {
                 )
             );
 
+            // Close edit form
             setEditingTask(null);
+
+            // Refresh statistics after update
+            fetchStats();
+
         } catch (error) {
             setError(
                 error.response?.data?.error ||
@@ -140,6 +154,10 @@ const Dashboard = () => {
                     (task) => task._id !== taskId
                 )
             );
+
+            // Refresh statistics after delete
+            fetchStats();
+
         } catch (error) {
             setError(
                 error.response?.data?.error ||
@@ -172,7 +190,6 @@ const Dashboard = () => {
         return matchesFilter && matchesSearch;
     });
 
-
     // ================================
     // DASHBOARD
     // ================================
@@ -183,6 +200,7 @@ const Dashboard = () => {
             {/* HEADER */}
 
             <header className="dashboard-header">
+
                 <div>
                     <h1>Task Management</h1>
 
@@ -192,6 +210,7 @@ const Dashboard = () => {
                 </div>
 
                 <div className="user-section">
+
                     <div>
                         <strong>
                             {user?.name}
@@ -208,7 +227,9 @@ const Dashboard = () => {
                     >
                         Logout
                     </button>
+
                 </div>
+
             </header>
 
             {/* STATISTICS */}
@@ -254,6 +275,7 @@ const Dashboard = () => {
             <section className="dashboard-section">
 
                 <div className="section-header">
+
                     <div>
                         <h2>Create New Task</h2>
 
@@ -261,14 +283,17 @@ const Dashboard = () => {
                             Add a new task to your workspace
                         </p>
                     </div>
+
                 </div>
 
                 <div className="create-task-card">
+
                     <CreateTask
                         onTaskCreated={
                             handleTaskCreated
                         }
                     />
+
                 </div>
 
             </section>
@@ -278,6 +303,7 @@ const Dashboard = () => {
             <section className="dashboard-section">
 
                 <div className="section-header">
+
                     <div>
                         <h2>My Tasks</h2>
 
@@ -285,6 +311,7 @@ const Dashboard = () => {
                             View and manage your tasks
                         </p>
                     </div>
+
                 </div>
 
                 {/* SEARCH */}
@@ -360,6 +387,7 @@ const Dashboard = () => {
                         </button>
 
                     </div>
+
                 </div>
 
                 {/* ============================
@@ -368,6 +396,7 @@ const Dashboard = () => {
 
                 {loading && (
                     <div className="state-card">
+
                         <div className="loading-spinner"></div>
 
                         <h3>
@@ -378,6 +407,7 @@ const Dashboard = () => {
                             Please wait while we
                             fetch your tasks.
                         </p>
+
                     </div>
                 )}
 
@@ -492,6 +522,7 @@ const Dashboard = () => {
 
                                         {editingTask?._id ===
                                         task._id ? (
+
                                             <EditTask
                                                 task={task}
                                                 onUpdate={
@@ -503,7 +534,9 @@ const Dashboard = () => {
                                                     )
                                                 }
                                             />
+
                                         ) : (
+
                                             <TaskCard
                                                 task={task}
                                                 onEdit={
@@ -513,6 +546,7 @@ const Dashboard = () => {
                                                     handleDeleteTask
                                                 }
                                             />
+
                                         )}
 
                                     </div>
