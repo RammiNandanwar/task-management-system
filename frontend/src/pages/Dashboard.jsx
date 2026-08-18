@@ -12,6 +12,13 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const [stats, setStats] = useState({
+    totalTasks: 0,
+    pendingTasks: 0,
+    inProgressTasks: 0,
+    completedTasks: 0
+});
+
     const [editingTask, setEditingTask] = useState(null);
     const [filter, setFilter] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
@@ -38,8 +45,22 @@ const Dashboard = () => {
         }
     };
 
+    const fetchStats = async () => {
+    try {
+        const response = await API.get("/tasks/stats");
+
+        setStats(response.data);
+    } catch (error) {
+        console.error(
+            "Failed to fetch task statistics:",
+            error
+        );
+    }
+};
+
     useEffect(() => {
         fetchTasks();
+        fetchStats();
     }, []);
 
     // ================================
@@ -47,11 +68,13 @@ const Dashboard = () => {
     // ================================
 
     const handleTaskCreated = (newTask) => {
-        setTasks((previousTasks) => [
-            newTask,
-            ...previousTasks
-        ]);
-    };
+    setTasks((previousTasks) => [
+        newTask,
+        ...previousTasks
+    ]);
+
+    fetchStats();
+};
 
     // ================================
     // OPEN EDIT FORM
@@ -149,21 +172,6 @@ const Dashboard = () => {
         return matchesFilter && matchesSearch;
     });
 
-    // ================================
-    // TASK COUNTS
-    // ================================
-
-    const pendingCount = tasks.filter(
-        (task) => task.status === "pending"
-    ).length;
-
-    const inProgressCount = tasks.filter(
-        (task) => task.status === "in-progress"
-    ).length;
-
-    const completedCount = tasks.filter(
-        (task) => task.status === "completed"
-    ).length;
 
     // ================================
     // DASHBOARD
@@ -209,29 +217,33 @@ const Dashboard = () => {
 
                 <div className="stat-card">
                     <span>Total Tasks</span>
+
                     <strong>
-                        {tasks.length}
+                        {stats.totalTasks}
                     </strong>
                 </div>
 
                 <div className="stat-card">
                     <span>Pending</span>
+
                     <strong>
-                        {pendingCount}
+                        {stats.pendingTasks}
                     </strong>
                 </div>
 
                 <div className="stat-card">
                     <span>In Progress</span>
+
                     <strong>
-                        {inProgressCount}
+                        {stats.inProgressTasks}
                     </strong>
                 </div>
 
                 <div className="stat-card">
                     <span>Completed</span>
+
                     <strong>
-                        {completedCount}
+                        {stats.completedTasks}
                     </strong>
                 </div>
 
