@@ -10,6 +10,7 @@ const Dashboard = () => {
 
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [statsLoading, setStatsLoading] = useState(false);
     const [error, setError] = useState("");
 
     const [stats, setStats] = useState({
@@ -51,14 +52,25 @@ const Dashboard = () => {
 
     const fetchStats = async () => {
         try {
+            setStatsLoading(true);
+
             const response = await API.get("/tasks/stats");
 
-            setStats(response.data);
+            setStats({
+                totalTasks: response.data.totalTasks || 0,
+                pendingTasks: response.data.pendingTasks || 0,
+                inProgressTasks:
+                    response.data.inProgressTasks || 0,
+                completedTasks:
+                    response.data.completedTasks || 0
+            });
         } catch (error) {
             console.error(
                 "Failed to fetch task statistics:",
                 error
             );
+        } finally {
+            setStatsLoading(false);
         }
     };
 
@@ -81,7 +93,6 @@ const Dashboard = () => {
             ...previousTasks
         ]);
 
-        // Refresh statistics
         fetchStats();
     };
 
@@ -117,10 +128,9 @@ const Dashboard = () => {
                 )
             );
 
-            // Close edit form
             setEditingTask(null);
 
-            // Refresh statistics after update
+            // Refresh statistics
             fetchStats();
 
         } catch (error) {
@@ -155,7 +165,7 @@ const Dashboard = () => {
                 )
             );
 
-            // Refresh statistics after delete
+            // Refresh statistics
             fetchStats();
 
         } catch (error) {
@@ -164,6 +174,19 @@ const Dashboard = () => {
                 "Unable to delete task. Please try again."
             );
         }
+    };
+
+    // ================================
+    // REFRESH DASHBOARD
+    // ================================
+
+    const handleRefresh = async () => {
+        setError("");
+
+        await Promise.all([
+            fetchTasks(),
+            fetchStats()
+        ]);
     };
 
     // ================================
@@ -237,35 +260,79 @@ const Dashboard = () => {
             <section className="stats-grid">
 
                 <div className="stat-card">
+
                     <span>Total Tasks</span>
 
                     <strong>
-                        {stats.totalTasks}
+                        {statsLoading
+                            ? "..."
+                            : stats.totalTasks}
                     </strong>
+
                 </div>
 
                 <div className="stat-card">
+
                     <span>Pending</span>
 
                     <strong>
-                        {stats.pendingTasks}
+                        {statsLoading
+                            ? "..."
+                            : stats.pendingTasks}
                     </strong>
+
                 </div>
 
                 <div className="stat-card">
+
                     <span>In Progress</span>
 
                     <strong>
-                        {stats.inProgressTasks}
+                        {statsLoading
+                            ? "..."
+                            : stats.inProgressTasks}
                     </strong>
+
                 </div>
 
                 <div className="stat-card">
+
                     <span>Completed</span>
 
                     <strong>
-                        {stats.completedTasks}
+                        {statsLoading
+                            ? "..."
+                            : stats.completedTasks}
                     </strong>
+
+                </div>
+
+            </section>
+
+            {/* DASHBOARD CONTROLS */}
+
+            <section className="dashboard-section">
+
+                <div className="section-header">
+
+                    <div>
+                        <h2>Dashboard</h2>
+
+                        <p>
+                            Manage and monitor your tasks
+                        </p>
+                    </div>
+
+                    <button
+                        className="retry-btn"
+                        onClick={handleRefresh}
+                        disabled={loading || statsLoading}
+                    >
+                        {loading || statsLoading
+                            ? "Refreshing..."
+                            : "Refresh"}
+                    </button>
+
                 </div>
 
             </section>
@@ -390,9 +457,7 @@ const Dashboard = () => {
 
                 </div>
 
-                {/* ============================
-                    LOADING STATE
-                ============================ */}
+                {/* LOADING STATE */}
 
                 {loading && (
                     <div className="state-card">
@@ -411,9 +476,7 @@ const Dashboard = () => {
                     </div>
                 )}
 
-                {/* ============================
-                    ERROR STATE
-                ============================ */}
+                {/* ERROR STATE */}
 
                 {!loading && error && (
                     <div className="state-card error-state">
@@ -440,9 +503,7 @@ const Dashboard = () => {
                     </div>
                 )}
 
-                {/* ============================
-                    EMPTY STATE
-                ============================ */}
+                {/* EMPTY STATE */}
 
                 {!loading &&
                     !error &&
@@ -466,9 +527,7 @@ const Dashboard = () => {
                         </div>
                     )}
 
-                {/* ============================
-                    NO SEARCH RESULTS
-                ============================ */}
+                {/* NO SEARCH RESULTS */}
 
                 {!loading &&
                     !error &&
@@ -504,9 +563,7 @@ const Dashboard = () => {
                         </div>
                     )}
 
-                {/* ============================
-                    TASK GRID
-                ============================ */}
+                {/* TASK GRID */}
 
                 {!loading &&
                     !error &&
