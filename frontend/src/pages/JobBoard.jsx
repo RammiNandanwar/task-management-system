@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 const JobBoard = () => {
+    const navigate = useNavigate();
+
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // ================================
+    // FETCH JOBS
+    // ================================
 
     const fetchJobs = async () => {
         try {
@@ -24,34 +31,83 @@ const JobBoard = () => {
         }
     };
 
+    // ================================
+    // LOAD JOBS
+    // ================================
+
     useEffect(() => {
         fetchJobs();
     }, []);
 
+    // ================================
+    // LOADING STATE
+    // ================================
+
     if (loading) {
         return (
             <div className="page-container">
-                <h1>Available Jobs</h1>
-                <p>Loading jobs...</p>
+                <div className="page-header">
+                    <h1>Available Jobs</h1>
+
+                    <p>
+                        Find the right opportunity for your
+                        skills and experience.
+                    </p>
+                </div>
+
+                <div className="state-card">
+                    <h3>Loading jobs...</h3>
+
+                    <p>
+                        Please wait while we fetch the
+                        latest job openings.
+                    </p>
+                </div>
             </div>
         );
     }
+
+    // ================================
+    // ERROR STATE
+    // ================================
 
     if (error) {
         return (
             <div className="page-container">
-                <h1>Available Jobs</h1>
-                <p>{error}</p>
+                <div className="page-header">
+                    <h1>Available Jobs</h1>
 
-                <button onClick={fetchJobs}>
-                    Try Again
-                </button>
+                    <p>
+                        Find the right opportunity for your
+                        skills and experience.
+                    </p>
+                </div>
+
+                <div className="state-card error-state">
+                    <h3>Unable to load jobs</h3>
+
+                    <p>{error}</p>
+
+                    <button
+                        className="retry-btn"
+                        onClick={fetchJobs}
+                    >
+                        Try Again
+                    </button>
+                </div>
             </div>
         );
     }
 
+    // ================================
+    // JOB BOARD
+    // ================================
+
     return (
         <div className="page-container">
+
+            {/* PAGE HEADER */}
+
             <div className="page-header">
                 <h1>Available Jobs</h1>
 
@@ -61,8 +117,10 @@ const JobBoard = () => {
                 </p>
             </div>
 
+            {/* EMPTY STATE */}
+
             {jobs.length === 0 ? (
-                <div className="empty-state">
+                <div className="state-card">
                     <h2>No jobs available</h2>
 
                     <p>
@@ -71,39 +129,71 @@ const JobBoard = () => {
                     </p>
                 </div>
             ) : (
+
+                /* JOB GRID */
+
                 <div className="job-grid">
+
                     {jobs.map((job) => (
                         <div
                             className="job-card"
                             key={job._id}
                         >
-                            <div className="job-card-header">
-                                <h2>{job.title}</h2>
 
-                                <span>
+                            {/* JOB HEADER */}
+
+                            <div className="job-card-header">
+
+                                <div>
+                                    <h2>
+                                        {job.title}
+                                    </h2>
+
+                                    <p className="job-company">
+                                        {job.company}
+                                    </p>
+                                </div>
+
+                                <span className="job-type">
                                     {job.employmentType}
                                 </span>
+
                             </div>
 
-                            <p className="job-company">
-                                {job.company}
-                            </p>
+                            {/* JOB INFORMATION */}
 
-                            <p>
-                                📍 {job.location}
-                            </p>
+                            <div className="job-info">
 
-                            <p>
-                                💼 Experience:{" "}
-                                {job.experience}
-                            </p>
+                                <p>
+                                    📍{" "}
+                                    <strong>
+                                        Location:
+                                    </strong>{" "}
+                                    {job.location}
+                                </p>
 
-                            <p>
-                                💰 Salary:{" "}
-                                {job.salary}
-                            </p>
+                                <p>
+                                    💼{" "}
+                                    <strong>
+                                        Experience:
+                                    </strong>{" "}
+                                    {job.experience}
+                                </p>
+
+                                <p>
+                                    💰{" "}
+                                    <strong>
+                                        Salary:
+                                    </strong>{" "}
+                                    {job.salary}
+                                </p>
+
+                            </div>
+
+                            {/* SKILLS */}
 
                             <div className="job-skills">
+
                                 {job.skills?.map(
                                     (skill, index) => (
                                         <span
@@ -113,26 +203,34 @@ const JobBoard = () => {
                                         </span>
                                     )
                                 )}
+
                             </div>
+
+                            {/* DESCRIPTION */}
 
                             <p className="job-description">
                                 {job.description}
                             </p>
 
+                            {/* VIEW JOB */}
+
                             <button
                                 className="view-job-btn"
                                 onClick={() =>
-                                    window.alert(
-                                        "Job details and application functionality will be added in the next steps."
+                                    navigate(
+                                        `/jobs/${job._id}`
                                     )
                                 }
                             >
                                 View Job
                             </button>
+
                         </div>
                     ))}
+
                 </div>
             )}
+
         </div>
     );
 };
