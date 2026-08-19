@@ -207,8 +207,6 @@ exports.updateJob = async (req, res) => {
 
 exports.deleteJob = async (req, res) => {
     try {
-        // Instead of permanently deleting,
-        // change status to archived
         const job = await Job.findOne({
             _id: req.params.id,
             recruiter: req.user._id
