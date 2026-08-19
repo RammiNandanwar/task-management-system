@@ -41,7 +41,7 @@ exports.createJob = async (req, res) => {
             experience,
             salary,
             employmentType,
-            recruiter: req.user.userId
+            recruiter: req.user._id
         });
 
         res.status(201).json({
@@ -140,7 +140,7 @@ exports.updateJob = async (req, res) => {
         // Find job belonging to logged-in recruiter
         const job = await Job.findOne({
             _id: req.params.id,
-            recruiter: req.user.userId
+            recruiter: req.user._id
         });
 
         if (!job) {
@@ -211,7 +211,7 @@ exports.deleteJob = async (req, res) => {
         // change status to archived
         const job = await Job.findOne({
             _id: req.params.id,
-            recruiter: req.user.userId
+            recruiter: req.user._id
         });
 
         if (!job) {
