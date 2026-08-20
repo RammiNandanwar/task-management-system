@@ -8,23 +8,27 @@ const {
 } = require("../controllers/applicationController");
 
 const authMiddleware = require("../middleware/auth");
+
 const authorizeRole = require("../middleware/role");
+
+const uploadResume = require("../middleware/uploadResume");
 
 
 // ======================================
 // APPLICANT ROUTES
 // ======================================
 
-// Apply for a job
+// Apply for a job + upload resume
 router.post(
     "/jobs/:jobId",
     authMiddleware,
     authorizeRole("applicant"),
+    uploadResume.single("resume"),
     applyForJob
 );
 
 
-// Get logged-in applicant's applications
+// Get applicant's applications
 router.get(
     "/my",
     authMiddleware,

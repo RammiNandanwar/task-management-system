@@ -7,8 +7,9 @@ const Job = require("../models/job");
 
 exports.applyForJob = async (req, res) => {
     try {
-        const { coverLetter = "" } = req.body || {};
+        const { coverLetter } = req.body;
 
+        // Check job
         const job = await Job.findOne({
             _id: req.params.jobId,
             status: "active"
@@ -20,7 +21,7 @@ exports.applyForJob = async (req, res) => {
             });
         }
 
-        // Check if applicant already applied
+        // Check duplicate application
         const existingApplication =
             await Application.findOne({
                 job: job._id,
@@ -29,16 +30,37 @@ exports.applyForJob = async (req, res) => {
 
         if (existingApplication) {
             return res.status(400).json({
-                error: "You have already applied for this job"
+                error:
+                    "You have already applied for this job"
             });
         }
 
+        // Resume is required
+        if (!req.file) {
+            return res.status(400).json({
+                error: "Resume PDF is required"
+            });
+        }
+
+        // Create application
         const application = await Application.create({
             job: job._id,
+
             applicant: req.user._id,
-            coverLetter: coverLetter || ""
+
+            coverLetter: coverLetter || "",
+
+            resume: {
+                fileName: req.file.originalname,
+
+                fileUrl:
+                    `/uploads/resumes/${req.file.filename}`,
+
+                filePath: req.file.path
+            }
         });
 
+        // Populate response
         const populatedApplication =
             await Application.findById(
                 application._id
@@ -53,7 +75,9 @@ exports.applyForJob = async (req, res) => {
                 );
 
         res.status(201).json({
-            message: "Application submitted successfully",
+            message:
+                "Application submitted successfully",
+
             application: populatedApplication
         });
 

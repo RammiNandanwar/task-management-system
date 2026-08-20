@@ -32,13 +32,18 @@ const applicationSchema = new mongoose.Schema(
             default: "applied"
         },
 
-        resume: {
+       resume: {
             fileName: {
                 type: String,
                 default: ""
             },
 
             fileUrl: {
+                type: String,
+                default: ""
+            },
+
+            filePath: {
                 type: String,
                 default: ""
             }
