@@ -32,7 +32,7 @@ const applicationSchema = new mongoose.Schema(
             default: "applied"
         },
 
-       resume: {
+        resume: {
             fileName: {
                 type: String,
                 default: ""
@@ -44,6 +44,11 @@ const applicationSchema = new mongoose.Schema(
             },
 
             filePath: {
+                type: String,
+                default: ""
+            },
+
+            extractedText: {
                 type: String,
                 default: ""
             }

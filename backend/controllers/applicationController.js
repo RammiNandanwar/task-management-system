@@ -1,4 +1,5 @@
 const Application = require("../models/application");
+const extractResumeText = require("../utils/resumeParser");
 const Job = require("../models/job");
 
 // ======================================
@@ -9,7 +10,10 @@ exports.applyForJob = async (req, res) => {
     try {
         const { coverLetter } = req.body;
 
-        // Check job
+        // ======================================
+        // CHECK JOB
+        // ======================================
+
         const job = await Job.findOne({
             _id: req.params.jobId,
             status: "active"
@@ -21,7 +25,10 @@ exports.applyForJob = async (req, res) => {
             });
         }
 
-        // Check duplicate application
+        // ======================================
+        // CHECK DUPLICATE APPLICATION
+        // ======================================
+
         const existingApplication =
             await Application.findOne({
                 job: job._id,
@@ -35,32 +42,63 @@ exports.applyForJob = async (req, res) => {
             });
         }
 
-        // Resume is required
+        // ======================================
+        // CHECK RESUME
+        // ======================================
+
         if (!req.file) {
             return res.status(400).json({
                 error: "Resume PDF is required"
             });
         }
 
-        // Create application
-        const application = await Application.create({
-            job: job._id,
+        // ======================================
+        // EXTRACT RESUME TEXT
+        // ======================================
 
-            applicant: req.user._id,
+        const extractedText =
+            await extractResumeText(
+                req.file.path
+            );
 
-            coverLetter: coverLetter || "",
+        if (!extractedText) {
+            return res.status(400).json({
+                error:
+                    "Could not extract text from the resume"
+            });
+        }
 
-            resume: {
-                fileName: req.file.originalname,
+        // ======================================
+        // CREATE APPLICATION
+        // ======================================
 
-                fileUrl:
-                    `/uploads/resumes/${req.file.filename}`,
+        const application =
+            await Application.create({
+                job: job._id,
 
-                filePath: req.file.path
-            }
-        });
+                applicant: req.user._id,
 
-        // Populate response
+                coverLetter:
+                    coverLetter || "",
+
+                resume: {
+                    fileName:
+                        req.file.originalname,
+
+                    fileUrl:
+                        `/uploads/resumes/${req.file.filename}`,
+
+                    filePath:
+                        req.file.path,
+
+                    extractedText
+                }
+            });
+
+        // ======================================
+        // POPULATE RESPONSE
+        // ======================================
+
         const populatedApplication =
             await Application.findById(
                 application._id
@@ -76,12 +114,17 @@ exports.applyForJob = async (req, res) => {
 
         res.status(201).json({
             message:
-                "Application submitted successfully",
+                "Application submitted and resume processed successfully",
 
             application: populatedApplication
         });
 
     } catch (error) {
+        console.error(
+            "Resume processing error:",
+            error
+        );
+
         res.status(500).json({
             error: error.message
         });
