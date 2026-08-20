@@ -6,7 +6,6 @@ import Dashboard from "./pages/Dashboard";
 import JobBoard from "./pages/JobBoard";
 import JobDetails from "./pages/JobDetails";
 import ApplyJob from "./pages/ApplyJob";
-import ApplyJob from "./pages/ApplyJob";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
