@@ -4,21 +4,23 @@ const router = express.Router();
 
 const {
     applyForJob,
-    getMyApplications
+    getMyApplications,
+    getJobApplications
 } = require("../controllers/applicationController");
 
 const authMiddleware = require("../middleware/auth");
 
-const authorizeRole = require("../middleware/role");
+const authorizeRole =
+    require("../middleware/role");
 
-const uploadResume = require("../middleware/uploadResume");
+const uploadResume =
+    require("../middleware/uploadResume");
 
 
 // ======================================
-// APPLICANT ROUTES
+// APPLICANT
 // ======================================
 
-// Apply for a job + upload resume
 router.post(
     "/jobs/:jobId",
     authMiddleware,
@@ -28,12 +30,23 @@ router.post(
 );
 
 
-// Get applicant's applications
 router.get(
     "/my",
     authMiddleware,
     authorizeRole("applicant"),
     getMyApplications
+);
+
+
+// ======================================
+// RECRUITER
+// ======================================
+
+router.get(
+    "/job/:jobId",
+    authMiddleware,
+    authorizeRole("recruiter"),
+    getJobApplications
 );
 
 
