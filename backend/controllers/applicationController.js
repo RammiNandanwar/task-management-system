@@ -1,6 +1,7 @@
 const Application = require("../models/application");
-const extractResumeText = require("../utils/resumeParser");
 const Job = require("../models/job");
+const extractResumeText = require("../utils/resumeParser");
+const analyzeResume = require("../services/aiService");
 
 // ======================================
 // APPLY FOR A JOB
@@ -69,6 +70,15 @@ exports.applyForJob = async (req, res) => {
         }
 
         // ======================================
+        // AI ANALYSIS
+        // ======================================
+
+        const aiAnalysis = await analyzeResume(
+            extractedText,
+            job.description
+        );
+
+        // ======================================
         // CREATE APPLICATION
         // ======================================
 
@@ -81,6 +91,8 @@ exports.applyForJob = async (req, res) => {
                 coverLetter:
                     coverLetter || "",
 
+                status: "applied",
+
                 resume: {
                     fileName:
                         req.file.originalname,
@@ -92,11 +104,31 @@ exports.applyForJob = async (req, res) => {
                         req.file.path,
 
                     extractedText
+                },
+
+                aiAnalysis: {
+                    matchScore:
+                        aiAnalysis.matchScore,
+
+                    skills:
+                        aiAnalysis.skills,
+
+                    experience:
+                        aiAnalysis.experience,
+
+                    strengths:
+                        aiAnalysis.strengths,
+
+                    missingSkills:
+                        aiAnalysis.missingSkills,
+
+                    summary:
+                        aiAnalysis.summary
                 }
             });
 
         // ======================================
-        // POPULATE RESPONSE
+        // POPULATE APPLICATION
         // ======================================
 
         const populatedApplication =
@@ -105,23 +137,27 @@ exports.applyForJob = async (req, res) => {
             )
                 .populate(
                     "job",
-                    "title company location"
+                    "title company location description"
                 )
                 .populate(
                     "applicant",
                     "name email"
                 );
 
+        // ======================================
+        // RESPONSE
+        // ======================================
+
         res.status(201).json({
             message:
-                "Application submitted and resume processed successfully",
+                "Application submitted and AI analysis completed",
 
             application: populatedApplication
         });
 
     } catch (error) {
         console.error(
-            "Resume processing error:",
+            "Application + AI analysis error:",
             error
         );
 
@@ -130,7 +166,6 @@ exports.applyForJob = async (req, res) => {
         });
     }
 };
-
 
 // ======================================
 // GET APPLICANT'S APPLICATIONS

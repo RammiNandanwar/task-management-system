@@ -60,14 +60,29 @@ const applicationSchema = new mongoose.Schema(
                 default: null
             },
 
-            summary: {
+            skills: {
+                type: [String],
+                default: []
+            },
+
+            experience: {
                 type: String,
                 default: ""
             },
 
-            skills: {
+            strengths: {
                 type: [String],
                 default: []
+            },
+
+            missingSkills: {
+                type: [String],
+                default: []
+            },
+
+            summary: {
+                type: String,
+                default: ""
             }
         }
     },

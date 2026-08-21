@@ -1,23 +1,37 @@
+// Load environment variables FIRST
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const path = require("path");
 
+// Routes
 const authRoutes = require("./routes/authroute");
 const taskRoutes = require("./routes/taskroute");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
-dotenv.config();
 
+// Check Gemini API key
+console.log(
+    "Gemini API Key loaded:",
+    !!process.env.GEMINI_API_KEY
+);
+
+// Connect MongoDB
 connectDB();
 
 const app = express();
 
-// Middleware
+// ================================
+// MIDDLEWARE
+// ================================
+
 app.use(cors());
+
 app.use(express.json());
 
+// Serve uploaded files
 app.use(
     "/uploads",
     express.static(
@@ -25,21 +39,50 @@ app.use(
     )
 );
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/tasks", taskRoutes);
-app.use("/api/jobs", jobRoutes);
-app.use("/api/applications", applicationRoutes);
+// ================================
+// ROUTES
+// ================================
 
-// Test route
+app.use(
+    "/api/auth",
+    authRoutes
+);
+
+app.use(
+    "/api/tasks",
+    taskRoutes
+);
+
+app.use(
+    "/api/jobs",
+    jobRoutes
+);
+
+app.use(
+    "/api/applications",
+    applicationRoutes
+);
+
+// ================================
+// TEST ROUTE
+// ================================
+
 app.get("/", (req, res) => {
     res.json({
-        message: "Task Management System API is running"
+        message:
+            "Task Management System API is running"
     });
 });
 
-const PORT = process.env.PORT || 5000;
+// ================================
+// SERVER
+// ================================
+
+const PORT =
+    process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(
+        `Server running on port ${PORT}`
+    );
 });
