@@ -1,240 +1,270 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/useAuth";
 import API from "../services/api";
-import CreateTask from "../components/CreateTask";
-import TaskCard from "../components/TaskCard";
-import EditTask from "../components/EditTask";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
-    const [tasks, setTasks] = useState([]);
+    const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [statsLoading, setStatsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const [stats, setStats] = useState({
-        totalTasks: 0,
-        pendingTasks: 0,
-        inProgressTasks: 0,
-        completedTasks: 0
+    const [showCreateForm, setShowCreateForm] =
+        useState(false);
+
+    const [creating, setCreating] = useState(false);
+
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        company: "",
+        location: "",
+        skills: "",
+        experience: "",
+        salary: "",
+        employmentType: "Full-time"
     });
 
-    const [editingTask, setEditingTask] = useState(null);
-    const [filter, setFilter] = useState("all");
-    const [searchTerm, setSearchTerm] = useState("");
+    // ======================================
+    // FETCH JOBS
+    // ======================================
 
-    // ================================
-    // FETCH TASKS
-    // ================================
-
-    const fetchTasks = async () => {
+    const fetchJobs = async () => {
         try {
             setLoading(true);
             setError("");
 
-            const response = await API.get("/tasks");
+            const response = await API.get("/jobs");
 
-            setTasks(response.data.tasks || []);
+            const allJobs =
+                response.data.jobs || [];
+
+            // Get current user's ID
+            const currentUserId =
+                user?._id || user?.id;
+
+            // Only show jobs created by
+            // the logged-in recruiter
+            const recruiterJobs =
+                allJobs.filter((job) => {
+                    const recruiterId =
+                        job.recruiter?._id ||
+                        job.recruiter?.id ||
+                        job.recruiter;
+
+                    return (
+                        String(recruiterId) ===
+                        String(currentUserId)
+                    );
+                });
+
+            setJobs(recruiterJobs);
+
         } catch (error) {
             setError(
                 error.response?.data?.error ||
-                "Unable to load tasks. Please try again."
+                "Unable to load jobs."
             );
         } finally {
             setLoading(false);
         }
     };
 
-    // ================================
-    // FETCH TASK STATISTICS
-    // ================================
-
-    const fetchStats = async () => {
-        try {
-            setStatsLoading(true);
-
-            const response = await API.get("/tasks/stats");
-
-            setStats({
-                totalTasks: response.data.totalTasks || 0,
-                pendingTasks: response.data.pendingTasks || 0,
-                inProgressTasks:
-                    response.data.inProgressTasks || 0,
-                completedTasks:
-                    response.data.completedTasks || 0
-            });
-        } catch (error) {
-            console.error(
-                "Failed to fetch task statistics:",
-                error
-            );
-        } finally {
-            setStatsLoading(false);
-        }
-    };
-
-    // ================================
-    // INITIAL LOAD
-    // ================================
-
     useEffect(() => {
-        fetchTasks();
-        fetchStats();
-    }, []);
+        if (user) {
+            fetchJobs();
+        }
+    }, [user]);
 
-    // ================================
-    // CREATE TASK
-    // ================================
+    // ======================================
+    // HANDLE FORM CHANGE
+    // ======================================
 
-    const handleTaskCreated = (newTask) => {
-        setTasks((previousTasks) => [
-            newTask,
-            ...previousTasks
-        ]);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
 
-        fetchStats();
+        setFormData((previous) => ({
+            ...previous,
+            [name]: value
+        }));
     };
 
-    // ================================
-    // OPEN EDIT FORM
-    // ================================
+    // ======================================
+    // CREATE JOB
+    // ======================================
 
-    const handleEditTask = (task) => {
-        setEditingTask(task);
-    };
+    const handleCreateJob = async (e) => {
+        e.preventDefault();
 
-    // ================================
-    // UPDATE TASK
-    // ================================
-
-    const handleUpdateTask = async (
-        taskId,
-        updatedData
-    ) => {
         try {
+            setCreating(true);
             setError("");
 
-            const response = await API.patch(
-                `/tasks/${taskId}`,
-                updatedData
+            const skillsArray =
+                formData.skills
+                    .split(",")
+                    .map((skill) => skill.trim())
+                    .filter(Boolean);
+
+            const response = await API.post(
+                "/jobs",
+                {
+                    title: formData.title,
+                    description:
+                        formData.description,
+                    company: formData.company,
+                    location: formData.location,
+                    skills: skillsArray,
+                    experience:
+                        formData.experience,
+                    salary: formData.salary,
+                    employmentType:
+                        formData.employmentType
+                }
             );
 
-            setTasks((previousTasks) =>
-                previousTasks.map((task) =>
-                    task._id === taskId
-                        ? response.data.task
-                        : task
-                )
-            );
+            const newJob =
+                response.data.job;
 
-            setEditingTask(null);
+            setJobs((previousJobs) => [
+                newJob,
+                ...previousJobs
+            ]);
 
-            // Refresh statistics
-            fetchStats();
+            setFormData({
+                title: "",
+                description: "",
+                company: "",
+                location: "",
+                skills: "",
+                experience: "",
+                salary: "",
+                employmentType: "Full-time"
+            });
+
+            setShowCreateForm(false);
 
         } catch (error) {
             setError(
                 error.response?.data?.error ||
-                "Unable to update task. Please try again."
+                "Unable to create job."
             );
+        } finally {
+            setCreating(false);
         }
     };
 
-    // ================================
-    // DELETE TASK
-    // ================================
+    // ======================================
+    // ARCHIVE JOB
+    // ======================================
 
-    const handleDeleteTask = async (taskId) => {
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this task?"
+    const handleArchiveJob = async (jobId) => {
+        const confirmed = window.confirm(
+            "Are you sure you want to archive this job?"
         );
 
-        if (!confirmDelete) {
+        if (!confirmed) {
             return;
         }
 
         try {
             setError("");
 
-            await API.delete(`/tasks/${taskId}`);
-
-            setTasks((previousTasks) =>
-                previousTasks.filter(
-                    (task) => task._id !== taskId
-                )
+            await API.delete(
+                `/jobs/${jobId}`
             );
 
-            // Refresh statistics
-            fetchStats();
+            setJobs((previousJobs) =>
+                previousJobs.filter(
+                    (job) =>
+                        job._id !== jobId
+                )
+            );
 
         } catch (error) {
             setError(
                 error.response?.data?.error ||
-                "Unable to delete task. Please try again."
+                "Unable to archive job."
             );
         }
     };
 
-    // ================================
-    // REFRESH DASHBOARD
-    // ================================
+    // ======================================
+    // LOGOUT
+    // ======================================
 
-    const handleRefresh = async () => {
-        setError("");
-
-        await Promise.all([
-            fetchTasks(),
-            fetchStats()
-        ]);
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
     };
 
-    // ================================
-    // FILTER + SEARCH
-    // ================================
+    // ======================================
+    // DASHBOARD STATS
+    // ======================================
 
-    const filteredTasks = tasks.filter((task) => {
-        const matchesFilter =
-            filter === "all" ||
-            task.status === filter;
+    const totalJobs = jobs.length;
 
-        const search = searchTerm
-            .toLowerCase()
-            .trim();
+    const activeJobs = jobs.filter(
+        (job) => job.status === "active"
+    ).length;
 
-        const matchesSearch =
-            task.title
-                ?.toLowerCase()
-                .includes(search) ||
-            task.description
-                ?.toLowerCase()
-                .includes(search);
+    // ======================================
+    // LOADING
+    // ======================================
 
-        return matchesFilter && matchesSearch;
-    });
+    if (loading) {
+        return (
+            <div className="ats-dashboard">
 
-    // ================================
-    // DASHBOARD
-    // ================================
+                <div className="ats-state-card">
 
-    return (
-        <div className="dashboard">
-
-            {/* HEADER */}
-
-            <header className="dashboard-header">
-
-                <div>
-                    <h1>Task Management</h1>
+                    <h2>
+                        Loading recruiter dashboard...
+                    </h2>
 
                     <p>
-                        Organize and manage your tasks
+                        Please wait while we load
+                        your jobs.
                     </p>
+
                 </div>
 
-                <div className="user-section">
+            </div>
+        );
+    }
 
-                    <div>
+    // ======================================
+    // DASHBOARD
+    // ======================================
+
+    return (
+        <div className="ats-dashboard">
+
+            {/* ==================================
+                HEADER
+            ================================== */}
+
+            <header className="ats-header">
+
+                <div>
+
+                    <h1>
+                        Recruiter Dashboard
+                    </h1>
+
+                    <p>
+                        Manage your job openings
+                        and candidates.
+                    </p>
+
+                </div>
+
+                <div className="ats-user-section">
+
+                    <div className="ats-user-info">
+
                         <strong>
                             {user?.name}
                         </strong>
@@ -242,11 +272,16 @@ const Dashboard = () => {
                         <span>
                             {user?.email}
                         </span>
+
+                        <small>
+                            Recruiter
+                        </small>
+
                     </div>
 
                     <button
-                        className="logout-btn"
-                        onClick={logout}
+                        className="ats-logout-btn"
+                        onClick={handleLogout}
                     >
                         Logout
                     </button>
@@ -255,363 +290,494 @@ const Dashboard = () => {
 
             </header>
 
-            {/* STATISTICS */}
 
-            <section className="stats-grid">
+            {/* ==================================
+                ERROR
+            ================================== */}
 
-                <div className="stat-card">
+            {error && (
+                <div className="ats-error">
+                    {error}
+                </div>
+            )}
 
-                    <span>Total Tasks</span>
+
+            {/* ==================================
+                STATISTICS
+            ================================== */}
+
+            <section className="ats-stats">
+
+                <div className="ats-stat-card">
+
+                    <span>
+                        Total Jobs
+                    </span>
 
                     <strong>
-                        {statsLoading
-                            ? "..."
-                            : stats.totalTasks}
+                        {totalJobs}
                     </strong>
 
                 </div>
 
-                <div className="stat-card">
 
-                    <span>Pending</span>
+                <div className="ats-stat-card">
+
+                    <span>
+                        Active Jobs
+                    </span>
 
                     <strong>
-                        {statsLoading
-                            ? "..."
-                            : stats.pendingTasks}
+                        {activeJobs}
                     </strong>
 
                 </div>
 
-                <div className="stat-card">
 
-                    <span>In Progress</span>
+                <div className="ats-stat-card">
 
-                    <strong>
-                        {statsLoading
-                            ? "..."
-                            : stats.inProgressTasks}
-                    </strong>
-
-                </div>
-
-                <div className="stat-card">
-
-                    <span>Completed</span>
+                    <span>
+                        Candidate Ranking
+                    </span>
 
                     <strong>
-                        {statsLoading
-                            ? "..."
-                            : stats.completedTasks}
+                        AI
                     </strong>
 
                 </div>
 
             </section>
 
-            {/* DASHBOARD CONTROLS */}
 
-            <section className="dashboard-section">
+            {/* ==================================
+                JOB SECTION HEADER
+            ================================== */}
 
-                <div className="section-header">
+            <section className="ats-job-section">
+
+                <div className="ats-section-header">
 
                     <div>
-                        <h2>Dashboard</h2>
+
+                        <h2>
+                            My Job Listings
+                        </h2>
 
                         <p>
-                            Manage and monitor your tasks
+                            Create and manage your
+                            recruitment opportunities.
                         </p>
+
                     </div>
 
                     <button
-                        className="retry-btn"
-                        onClick={handleRefresh}
-                        disabled={loading || statsLoading}
+                        className="ats-create-btn"
+                        onClick={() =>
+                            setShowCreateForm(
+                                !showCreateForm
+                            )
+                        }
                     >
-                        {loading || statsLoading
-                            ? "Refreshing..."
-                            : "Refresh"}
+                        {showCreateForm
+                            ? "Cancel"
+                            : "+ Create New Job"}
                     </button>
 
                 </div>
 
-            </section>
 
-            {/* CREATE TASK */}
+                {/* ==================================
+                    CREATE JOB FORM
+                ================================== */}
 
-            <section className="dashboard-section">
+                {showCreateForm && (
+                    <form
+                        className="ats-create-form"
+                        onSubmit={handleCreateJob}
+                    >
 
-                <div className="section-header">
+                        <h2>
+                            Create New Job
+                        </h2>
 
-                    <div>
-                        <h2>Create New Task</h2>
 
-                        <p>
-                            Add a new task to your workspace
-                        </p>
-                    </div>
+                        <div className="ats-form-grid">
 
-                </div>
+                            <div className="ats-form-group">
 
-                <div className="create-task-card">
+                                <label>
+                                    Job Title
+                                </label>
 
-                    <CreateTask
-                        onTaskCreated={
-                            handleTaskCreated
-                        }
-                    />
+                                <input
+                                    name="title"
+                                    value={
+                                        formData.title
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
+                                    placeholder="e.g. MERN Stack Developer"
+                                    required
+                                />
 
-                </div>
+                            </div>
 
-            </section>
 
-            {/* TASKS */}
+                            <div className="ats-form-group">
 
-            <section className="dashboard-section">
+                                <label>
+                                    Company
+                                </label>
 
-                <div className="section-header">
+                                <input
+                                    name="company"
+                                    value={
+                                        formData.company
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
+                                    placeholder="Company name"
+                                    required
+                                />
 
-                    <div>
-                        <h2>My Tasks</h2>
+                            </div>
 
-                        <p>
-                            View and manage your tasks
-                        </p>
-                    </div>
 
-                </div>
+                            <div className="ats-form-group">
 
-                {/* SEARCH */}
+                                <label>
+                                    Location
+                                </label>
 
-                <div className="task-controls">
+                                <input
+                                    name="location"
+                                    value={
+                                        formData.location
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
+                                    placeholder="e.g. Pune / Remote"
+                                    required
+                                />
 
-                    <input
-                        className="search-input"
-                        type="text"
-                        placeholder="Search tasks..."
-                        value={searchTerm}
-                        onChange={(e) =>
-                            setSearchTerm(
-                                e.target.value
-                            )
-                        }
-                    />
+                            </div>
 
-                    {/* FILTER BUTTONS */}
 
-                    <div className="filter-buttons">
+                            <div className="ats-form-group">
 
-                        <button
-                            className={
-                                filter === "all"
-                                    ? "filter-btn active"
-                                    : "filter-btn"
-                            }
-                            onClick={() =>
-                                setFilter("all")
-                            }
-                        >
-                            All
-                        </button>
+                                <label>
+                                    Experience
+                                </label>
 
-                        <button
-                            className={
-                                filter === "pending"
-                                    ? "filter-btn active"
-                                    : "filter-btn"
-                            }
-                            onClick={() =>
-                                setFilter("pending")
-                            }
-                        >
-                            Pending
-                        </button>
+                                <input
+                                    name="experience"
+                                    value={
+                                        formData.experience
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
+                                    placeholder="e.g. 1-3 years"
+                                    required
+                                />
 
-                        <button
-                            className={
-                                filter === "in-progress"
-                                    ? "filter-btn active"
-                                    : "filter-btn"
-                            }
-                            onClick={() =>
-                                setFilter("in-progress")
-                            }
-                        >
-                            In Progress
-                        </button>
+                            </div>
 
-                        <button
-                            className={
-                                filter === "completed"
-                                    ? "filter-btn active"
-                                    : "filter-btn"
-                            }
-                            onClick={() =>
-                                setFilter("completed")
-                            }
-                        >
-                            Completed
-                        </button>
 
-                    </div>
+                            <div className="ats-form-group">
 
-                </div>
+                                <label>
+                                    Salary
+                                </label>
 
-                {/* LOADING STATE */}
+                                <input
+                                    name="salary"
+                                    value={
+                                        formData.salary
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
+                                    placeholder="e.g. 6-8 LPA"
+                                />
 
-                {loading && (
-                    <div className="state-card">
+                            </div>
 
-                        <div className="loading-spinner"></div>
 
-                        <h3>
-                            Loading your tasks
-                        </h3>
+                            <div className="ats-form-group">
 
-                        <p>
-                            Please wait while we
-                            fetch your tasks.
-                        </p>
+                                <label>
+                                    Employment Type
+                                </label>
 
-                    </div>
-                )}
+                                <select
+                                    name="employmentType"
+                                    value={
+                                        formData.employmentType
+                                    }
+                                    onChange={
+                                        handleChange
+                                    }
+                                >
 
-                {/* ERROR STATE */}
+                                    <option value="Full-time">
+                                        Full-time
+                                    </option>
 
-                {!loading && error && (
-                    <div className="state-card error-state">
+                                    <option value="Part-time">
+                                        Part-time
+                                    </option>
 
-                        <div className="state-icon">
-                            !
+                                    <option value="Internship">
+                                        Internship
+                                    </option>
+
+                                    <option value="Contract">
+                                        Contract
+                                    </option>
+
+                                </select>
+
+                            </div>
+
                         </div>
 
-                        <h3>
-                            Something went wrong
-                        </h3>
 
-                        <p>
-                            {error}
-                        </p>
+                        <div className="ats-form-group">
+
+                            <label>
+                                Required Skills
+                            </label>
+
+                            <input
+                                name="skills"
+                                value={
+                                    formData.skills
+                                }
+                                onChange={
+                                    handleChange
+                                }
+                                placeholder="React, Node.js, MongoDB, Express"
+                                required
+                            />
+
+                            <small>
+                                Separate skills using commas.
+                            </small>
+
+                        </div>
+
+
+                        <div className="ats-form-group">
+
+                            <label>
+                                Job Description
+                            </label>
+
+                            <textarea
+                                name="description"
+                                value={
+                                    formData.description
+                                }
+                                onChange={
+                                    handleChange
+                                }
+                                placeholder="Enter complete job description..."
+                                rows="6"
+                                required
+                            />
+
+                        </div>
+
 
                         <button
-                            className="retry-btn"
-                            onClick={fetchTasks}
+                            type="submit"
+                            className="ats-submit-btn"
+                            disabled={creating}
                         >
-                            Try Again
+                            {creating
+                                ? "Creating Job..."
+                                : "Create Job"}
                         </button>
 
-                    </div>
+                    </form>
                 )}
 
-                {/* EMPTY STATE */}
 
-                {!loading &&
-                    !error &&
-                    tasks.length === 0 && (
-                        <div className="state-card">
+                {/* ==================================
+                    NO JOBS
+                ================================== */}
 
-                            <div className="state-icon">
-                                +
+                {!showCreateForm &&
+                    jobs.length === 0 && (
+                        <div className="ats-empty">
+
+                            <div>
+                                📋
                             </div>
 
                             <h3>
-                                No tasks yet
+                                No jobs created yet
                             </h3>
 
                             <p>
-                                You don't have any tasks.
-                                Create your first task
-                                above to get started.
-                            </p>
-
-                        </div>
-                    )}
-
-                {/* NO SEARCH RESULTS */}
-
-                {!loading &&
-                    !error &&
-                    tasks.length > 0 &&
-                    filteredTasks.length === 0 && (
-                        <div className="state-card">
-
-                            <div className="state-icon">
-                                ?
-                            </div>
-
-                            <h3>
-                                No matching tasks
-                            </h3>
-
-                            <p>
-                                We couldn't find any
-                                tasks matching your
-                                search or selected
-                                filter.
+                                Create your first job
+                                opening to start
+                                receiving applications.
                             </p>
 
                             <button
-                                className="retry-btn"
-                                onClick={() => {
-                                    setSearchTerm("");
-                                    setFilter("all");
-                                }}
+                                className="ats-create-btn"
+                                onClick={() =>
+                                    setShowCreateForm(
+                                        true
+                                    )
+                                }
                             >
-                                Clear Search & Filter
+                                + Create Your First Job
                             </button>
 
                         </div>
                     )}
 
-                {/* TASK GRID */}
 
-                {!loading &&
-                    !error &&
-                    filteredTasks.length > 0 && (
-                        <div className="task-grid">
+                {/* ==================================
+                    JOB CARDS
+                ================================== */}
 
-                            {filteredTasks.map(
-                                (task) => (
-                                    <div
-                                        key={task._id}
-                                        className="task-wrapper"
-                                    >
+                {jobs.length > 0 && (
+                    <div className="ats-job-grid">
 
-                                        {editingTask?._id ===
-                                        task._id ? (
+                        {jobs.map((job) => (
 
-                                            <EditTask
-                                                task={task}
-                                                onUpdate={
-                                                    handleUpdateTask
-                                                }
-                                                onCancel={() =>
-                                                    setEditingTask(
-                                                        null
-                                                    )
-                                                }
-                                            />
+                            <div
+                                className="ats-job-card"
+                                key={job._id}
+                            >
 
-                                        ) : (
+                                <div className="ats-job-top">
 
-                                            <TaskCard
-                                                task={task}
-                                                onEdit={
-                                                    handleEditTask
-                                                }
-                                                onDelete={
-                                                    handleDeleteTask
-                                                }
-                                            />
+                                    <div>
 
-                                        )}
+                                        <h3>
+                                            {job.title}
+                                        </h3>
+
+                                        <p>
+                                            {job.company}
+                                        </p>
 
                                     </div>
-                                )
-                            )}
 
-                        </div>
-                    )}
+                                    <span
+                                        className="ats-status"
+                                    >
+                                        {job.status}
+                                    </span>
+
+                                </div>
+
+
+                                <div className="ats-job-details">
+
+                                    <span>
+                                        📍 {job.location}
+                                    </span>
+
+                                    <span>
+                                        💼{" "}
+                                        {
+                                            job.employmentType
+                                        }
+                                    </span>
+
+                                    <span>
+                                        🎓{" "}
+                                        {
+                                            job.experience
+                                        }
+                                    </span>
+
+                                </div>
+
+
+                                {/* SKILLS */}
+
+                                <div className="ats-skills">
+
+                                    {(Array.isArray(
+                                        job.skills
+                                    )
+                                        ? job.skills
+                                        : [job.skills]
+                                    ).map(
+                                        (
+                                            skill,
+                                            index
+                                        ) => (
+                                            <span
+                                                key={
+                                                    index
+                                                }
+                                            >
+                                                {skill}
+                                            </span>
+                                        )
+                                    )}
+
+                                </div>
+
+
+                                {/* ACTIONS */}
+
+                                <div className="ats-job-actions">
+
+                                    <button
+                                        className="ats-view-btn"
+                                        onClick={() =>
+                                            navigate(
+                                                `/jobs/${job._id}`
+                                            )
+                                        }
+                                    >
+                                        View Job
+                                    </button>
+
+
+                                    <button
+                                        className="ats-ranking-btn"
+                                        onClick={() =>
+                                            navigate(
+                                                `/recruiter/jobs/${job._id}/candidates`
+                                            )
+                                        }
+                                    >
+                                        Candidate Ranking
+                                    </button>
+
+
+                                    <button
+                                        className="ats-archive-btn"
+                                        onClick={() =>
+                                            handleArchiveJob(
+                                                job._id
+                                            )
+                                        }
+                                    >
+                                        Archive
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        ))}
+
+                    </div>
+                )}
 
             </section>
 

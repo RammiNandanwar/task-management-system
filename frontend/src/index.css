@@ -567,3 +567,945 @@ button {
 .retry-btn:hover {
     background: #4f46e5;
 }
+/* ======================================
+   CANDIDATE RANKING
+====================================== */
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    margin: 10px 0 5px;
+}
+
+.page-header p {
+    margin: 0;
+    opacity: 0.7;
+}
+
+.back-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.candidate-count {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.candidate-count strong {
+    font-size: 28px;
+}
+
+.candidate-count span {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+
+/* ======================================
+   FILTER PANEL
+====================================== */
+
+.filter-panel {
+    display: grid;
+    grid-template-columns:
+        2fr 1fr 1fr auto;
+
+    gap: 15px;
+
+    padding: 20px;
+
+    margin-bottom: 30px;
+
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 11px 12px;
+
+    border-radius: 8px;
+
+    border: 1px solid #d1d5db;
+
+    outline: none;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    border-color: #6366f1;
+}
+
+.clear-filter-btn {
+    align-self: end;
+
+    padding: 11px 16px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    background: #111827;
+
+    color: white;
+}
+
+
+/* ======================================
+   RESULTS
+====================================== */
+
+.results-header {
+    margin-bottom: 20px;
+}
+
+.results-header h2 {
+    margin-bottom: 5px;
+}
+
+.results-header p {
+    margin: 0;
+
+    opacity: 0.7;
+}
+
+
+/* ======================================
+   CANDIDATE CARD
+====================================== */
+
+.candidate-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.candidate-card {
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns:
+        60px
+        1.5fr
+        120px
+        1.5fr
+        1.5fr;
+
+    gap: 20px;
+
+    padding: 25px;
+
+    border-radius: 14px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+}
+
+.candidate-rank {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.candidate-info h2 {
+    margin: 0 0 5px;
+}
+
+.candidate-info p {
+    margin: 0 0 10px;
+
+    font-size: 14px;
+
+    opacity: 0.7;
+}
+
+.candidate-status {
+    display: inline-block;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    background: #f3f4f6;
+}
+
+
+/* ======================================
+   AI SCORE
+====================================== */
+
+.candidate-score {
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+.candidate-score strong {
+    font-size: 30px;
+}
+
+.candidate-score span {
+    font-size: 12px;
+
+    opacity: 0.7;
+}
+
+
+/* ======================================
+   SKILLS
+====================================== */
+
+.candidate-skills h4,
+.candidate-missing-skills h4,
+.candidate-summary h4 {
+    margin-top: 0;
+
+    margin-bottom: 10px;
+
+    font-size: 14px;
+}
+
+.candidate-skills div,
+.candidate-missing-skills div {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+.candidate-skills span {
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    background: #eef2ff;
+}
+
+.candidate-missing-skills span {
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    background: #fef2f2;
+}
+
+.candidate-summary {
+    grid-column: 2 / -1;
+}
+
+.candidate-summary p {
+    margin: 0;
+
+    line-height: 1.6;
+
+    font-size: 14px;
+
+    opacity: 0.8;
+}
+
+
+/* ======================================
+   VIEW DETAILS
+====================================== */
+
+.view-candidate-btn {
+    grid-column: 2 / -1;
+
+    justify-self: start;
+
+    padding: 10px 18px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    background: #111827;
+
+    color: white;
+}
+
+
+/* ======================================
+   MODAL
+====================================== */
+
+.modal-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    z-index: 1000;
+}
+
+.candidate-modal {
+    position: relative;
+
+    width: 100%;
+
+    max-width: 650px;
+
+    max-height: 85vh;
+
+    overflow-y: auto;
+
+    padding: 30px;
+
+    border-radius: 14px;
+
+    background: white;
+}
+
+.modal-close {
+    position: absolute;
+
+    top: 15px;
+
+    right: 15px;
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 28px;
+
+    cursor: pointer;
+}
+
+.modal-score {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    padding: 25px;
+
+    margin: 25px 0;
+
+    border-radius: 12px;
+
+    background: #f3f4f6;
+}
+
+.modal-score strong {
+    font-size: 42px;
+}
+
+.modal-score span {
+    opacity: 0.7;
+}
+
+.modal-section {
+    margin-top: 25px;
+}
+
+.modal-section h3 {
+    margin-bottom: 10px;
+}
+
+.modal-section p {
+    line-height: 1.6;
+}
+
+/* ==========================================
+   ATS RECRUITER DASHBOARD
+========================================== */
+
+.ats-dashboard {
+    min-height: 100vh;
+    padding: 30px;
+    background: #f5f7fb;
+}
+
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.ats-header {
+    max-width: 1200px;
+    margin: 0 auto 25px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 25px 30px;
+
+    background: white;
+    border-radius: 14px;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.ats-header h1 {
+    margin: 0 0 7px;
+    font-size: 30px;
+}
+
+.ats-header p {
+    margin: 0;
+    color: #6b7280;
+}
+
+.ats-user-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.ats-user-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.ats-user-info strong {
+    font-size: 16px;
+}
+
+.ats-user-info span {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.ats-user-info small {
+    margin-top: 3px;
+    color: #6366f1;
+    font-weight: 600;
+}
+
+.ats-logout-btn {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+
+    background: #ef4444;
+    color: white;
+
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.ats-logout-btn:hover {
+    opacity: 0.9;
+}
+
+
+/* ==========================================
+   ERROR
+========================================== */
+
+.ats-error {
+    max-width: 1200px;
+    margin: 0 auto 20px;
+
+    padding: 14px 18px;
+
+    border-radius: 8px;
+
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* ==========================================
+   STATISTICS
+========================================== */
+
+.ats-stats {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 20px;
+}
+
+.ats-stat-card {
+    padding: 25px;
+
+    background: white;
+
+    border-radius: 14px;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.ats-stat-card span {
+    display: block;
+
+    color: #6b7280;
+
+    margin-bottom: 10px;
+}
+
+.ats-stat-card strong {
+    font-size: 32px;
+}
+
+
+/* ==========================================
+   JOB SECTION
+========================================== */
+
+.ats-job-section {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.ats-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.ats-section-header h2 {
+    margin: 0 0 5px;
+}
+
+.ats-section-header p {
+    margin: 0;
+    color: #6b7280;
+}
+
+.ats-create-btn {
+    border: none;
+
+    padding: 12px 18px;
+
+    border-radius: 8px;
+
+    background: #4f46e5;
+    color: white;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+.ats-create-btn:hover {
+    background: #4338ca;
+}
+
+
+/* ==========================================
+   CREATE FORM
+========================================== */
+
+.ats-create-form {
+    margin-bottom: 30px;
+
+    padding: 25px;
+
+    background: white;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.ats-create-form h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.ats-form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 18px;
+}
+
+.ats-form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+
+    margin-bottom: 18px;
+}
+
+.ats-form-group label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ats-form-group input,
+.ats-form-group textarea,
+.ats-form-group select {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 11px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    font-family: inherit;
+}
+
+.ats-form-group input:focus,
+.ats-form-group textarea:focus,
+.ats-form-group select:focus {
+    border-color: #6366f1;
+}
+
+.ats-form-group small {
+    color: #6b7280;
+}
+
+.ats-submit-btn {
+    border: none;
+
+    padding: 12px 20px;
+
+    border-radius: 8px;
+
+    background: #16a34a;
+    color: white;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+.ats-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* ==========================================
+   JOB GRID
+========================================== */
+
+.ats-job-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 20px;
+}
+
+.ats-job-card {
+    padding: 22px;
+
+    background: white;
+
+    border-radius: 14px;
+
+    border: 1px solid #e5e7eb;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.ats-job-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+}
+
+.ats-job-top h3 {
+    margin: 0 0 5px;
+
+    font-size: 20px;
+}
+
+.ats-job-top p {
+    margin: 0;
+
+    color: #6b7280;
+}
+
+.ats-status {
+    height: fit-content;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: #dcfce7;
+
+    color: #166534;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-transform: capitalize;
+}
+
+
+/* ==========================================
+   JOB DETAILS
+========================================== */
+
+.ats-job-details {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-bottom: 15px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+
+/* ==========================================
+   SKILLS
+========================================== */
+
+.ats-skills {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-bottom: 20px;
+}
+
+.ats-skills span {
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    background: #eef2ff;
+
+    color: #4338ca;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+/* ==========================================
+   JOB ACTIONS
+========================================== */
+
+.ats-job-actions {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+.ats-job-actions button {
+    padding: 9px 12px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.ats-view-btn {
+    border: 1px solid #d1d5db;
+
+    background: white;
+}
+
+.ats-ranking-btn {
+    border: none;
+
+    background: #4f46e5;
+
+    color: white;
+}
+
+.ats-archive-btn {
+    border: 1px solid #fecaca;
+
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+
+/* ==========================================
+   EMPTY STATE
+========================================== */
+
+.ats-empty {
+    padding: 60px 20px;
+
+    text-align: center;
+
+    background: white;
+
+    border-radius: 14px;
+
+    border: 1px dashed #d1d5db;
+}
+
+.ats-empty > div {
+    font-size: 40px;
+}
+
+.ats-empty h3 {
+    margin-bottom: 8px;
+}
+
+.ats-empty p {
+    color: #6b7280;
+
+    margin-bottom: 20px;
+}
+
+
+/* ==========================================
+   LOADING STATE
+========================================== */
+
+.ats-state-card {
+    max-width: 600px;
+
+    margin: 100px auto;
+
+    padding: 40px;
+
+    text-align: center;
+
+    background: white;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width: 900px) {
+
+    .ats-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .ats-job-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ats-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 650px) {
+
+    .ats-dashboard {
+        padding: 15px;
+    }
+
+    .ats-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 20px;
+    }
+
+    .ats-user-section {
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+    .ats-user-info {
+        text-align: left;
+    }
+
+    .ats-section-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+}
